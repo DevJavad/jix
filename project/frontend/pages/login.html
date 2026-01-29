@@ -1,0 +1,91 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+
+<body>
+
+    <div>
+        <form id="loginForm" method="post">
+            <h2>Login</h2>
+            <p id="generalError"></p>
+            <p id="success"></p>
+
+            <div>
+                <input type="text" id="username" name="username" placeholder="Username">
+                <p id="usernameError"></p>
+            </div>
+
+            <div>
+                <input type="password" id="password" name="password" placeholder="Password...">
+                <p id="passwordError"></p>
+            </div>
+
+            <button type="submit">Send</button>
+
+            <p class="switch">
+                <a href="register.html">Create account</a>
+            </p>
+        </form>
+    </div>
+
+</body>
+<script>
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        const usernameError = document.getElementById("usernameError");
+        const passwordError = document.getElementById("passwordError");
+        const generalError = document.getElementById("generalError");
+        const success = document.getElementById("success");
+
+        [usernameError, passwordError, generalError, success]
+            .forEach(element => element.innerText = "");
+
+        if (username.trim() === "") {
+            usernameError.innerText = "Enter your username";
+            return;
+        }
+
+        if (password.trim() == "") {
+            passwordError.innerText = "Enter your password";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        fetch("../../project/backend/router/auth/login.php", {
+            method: "PSOT", body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    success.innerText = " Login successfull";
+                    window.location.href = "/project/index.php?page=home";
+                } else {
+                    switch (data.error) {
+                        case "INVALID_PASSWORD":
+                            generalError.innerText = "Password not correct";
+                            break;
+
+                        case "INVALID_USERNAME":
+                            generalError.innerText = "Username not correct";
+                            break;
+
+                        default:
+                            generalError.innerText = "Unkown error";
+                    }
+                }
+            })
+    })
+</script>
+
+</html>
