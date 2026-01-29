@@ -1,0 +1,108 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <div>
+        <form id="registerForm" method="post">
+            <h2>Register</h2>
+            <p id="generalError"></p>
+            <p id="success"></p>
+
+            <div>
+                <input type="text" id="username" name="username" placeholder="Username">
+                <p id="usernameError"></p>
+            </div>
+
+            <div>
+                <input type="password" id="password" name="password" placeholder="Password">
+                <p id="passwordError"></p>
+            </div>
+
+            <div>
+                <input type="password" id="confirm" name="confirm" placeholder="Confirm">
+                <p id="confirmError"></p>
+            </div>
+
+            <button type="submit">Send</button>
+
+            <p class="switch">
+                <a href="frontend/pages/login.html">I have account!</a>
+            </p>
+        </form>
+    </div>
+
+</body>
+<script>
+    document.getElementById("registerForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const confirm = document.getElementById("confirm").value;
+
+        const usernameError = document.getElementById("usernameError");
+        const passwordError = document.getElementById("passwordError");
+        const confirmError = document.getElementById("confirmError");
+        const generalError = document.getElementById("generalError");
+        const success = document.getElementById("success");
+
+        [usernameError, passwordError, confirmError, generalError, success]
+            .forEach(element => element.innerText = "");
+
+        if (username.trim() === "") {
+            usernameError.innerText = "Enter your username";
+            return;
+        }
+
+        if (password.trim() == "") {
+            passwordError.innerText = "Enter your password";
+            return;
+        }
+
+        if (confirm.trim() == "") {
+            confirmError.innerText = "Confirm your password";
+            return;
+        }
+
+        if (password !== confirm) {
+            confirmError.innerText = "password not correct";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        fetch("../../project/backend/router/auth/register.php", {
+            method: "POST", body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    success.innerText = "Authentication successfull";
+                    window.location.href = "/project/index.php?page=home";
+                } else {
+                    switch (data.error) {
+                        case "DUPLICATE_USERNAME":
+                            generalError.innerText = "The username is duplicate";
+                            break;
+                        
+                        case "SERVER_ERROR":
+                            generalError.innerText = "Server error, please try again later";
+                            break;
+
+                        default:
+                            generalError.innerText = "Unkown error";
+                    }
+                }
+            })
+    })
+</script>
+
+</html>
